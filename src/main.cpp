@@ -278,6 +278,8 @@ void opcontrol() {
   }
 
   pros::delay(ez::util::DELAY_TIME);  // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
+  matchloader.set(master.get_digital(DIGITAL_B));
+  hood.set(master.get_digital(DIGITAL_A));
+  gate.set(master.get_digital(DIGITAL_UP));
   }
-
 }
