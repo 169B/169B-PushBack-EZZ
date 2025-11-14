@@ -21,7 +21,7 @@ ez::Drive chassis(
 // - `2.75` is the wheel diameter
 // - `4.0` is the distance from the center of the wheel to the center of the robot
 // ez::tracking_wheel horiz_tracker(8, 2.75, 4.0);  // This tracking wheel is perpendicular to the drive wheels
-ez::tracking_wheel vert_tracker(9, 2., 0.0);   // This tracking wheel is parallel to the drive wheels
+ez::tracking_wheel vert_tracker(9, 2, 0.0);   // This tracking wheel is parallel to the drive wheels
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -35,14 +35,11 @@ void initialize() {
 
   pros::delay(500);  // Stop the user from doing anything while legacy ports configure
 
-  // Look at your horizontal tracking wheel and decide if it's in front of the midline of your robot or behind it
-  //  - change `back` to `front` if the tracking wheel is in front of the midline
-  //  - ignore this if you aren't using a horizontal tracker
-  // chassis.odom_tracker_back_set(&horiz_tracker);
+
   // Look at your vertical tracking wheel and decide if it's to the left or right of the center of the robot
   //  - change `left` to `right` if the tracking wheel is to the right of the centerline
   //  - ignore this if you aren't using a vertical tracker
-  // chassis.odom_tracker_left_set(&vert_tracker);
+  chassis.odom_tracker_left_set(&vert_tracker);
 
   // Configure your chassis controls
   chassis.opcontrol_curve_buttons_toggle(true);   // Enables modifying the controller curve with buttons on the joysticks
@@ -205,8 +202,8 @@ void ez_template_extras() {
     //  When enabled:
     //  * use A and Y to increment / decrement the constants
     //  * use the arrow keys to navigate the constants
-    if (master.get_digital_new_press(DIGITAL_X))
-      chassis.pid_tuner_toggle();
+    //if (master.get_digital_new_press(DIGITAL_X))
+    //  chassis.pid_tuner_toggle();
 
     // Trigger the selected autonomous routine
     if (master.get_digital(DIGITAL_B) && master.get_digital(DIGITAL_DOWN)) {
@@ -243,20 +240,44 @@ void opcontrol() {
   // This is preference to what you like to drive on
   chassis.drive_brake_set(MOTOR_BRAKE_COAST);
 
+  // Boolean for if the intake is spinning
+  bool intake_running = false;
+
   while (true) {
     // Gives you some extras to make EZ-Template ezier
     ez_template_extras();
 
     chassis.opcontrol_tank();  // Tank control
-    // chassis.opcontrol_arcade_standard(ez::SPLIT);   // Standard split arcade
-    // chassis.opcontrol_arcade_standard(ez::SINGLE);  // Standard single arcade
-    // chassis.opcontrol_arcade_flipped(ez::SPLIT);    // Flipped split arcade
-    // chassis.opcontrol_arcade_flipped(ez::SINGLE);   // Flipped single arcade
 
-    // . . .
-    // Put more user control code here!
-    // . . .
+    
+    // Set intake_running to the opposite of itself
+    if (master.get_digital_new_press(DIGITAL_R2)) {
+      intake_running = !intake_running;
+    }
 
-    pros::delay(ez::util::DELAY_TIME);  // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
+    // Spin the intake if intake_running is true
+    if (intake_running) {
+      intake.move(127);
+    }
+    // Stop the intake if intake_running is false 
+    else {
+      intake.move(0);
+    }
+
+  if (master.get_digital_new_press(DIGITAL_R1)) {
+      intake_running = !intake_running;
+    }
+
+    // Spin the intake if intake_running is true
+  if (intake_running) {
+    intake.move(127);
+    }
+    // Stop the intake if intake_running is false 
+  else {
+    intake.move(0);
   }
+
+  pros::delay(ez::util::DELAY_TIME);  // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
+  }
+
 }
