@@ -8,12 +8,12 @@
 // Chassis constructor
 ez::Drive chassis(
     // These are your drive motors, the first motor is used for sensing!
-    {1, 2, 3},     // Left Chassis Ports (negative port will reverse it!)
-    {-4, -5, -6},  // Right Chassis Ports (negative port will reverse it!)
+    {-11, 12, -13},     // Left Chassis Ports (negative port will reverse it!)
+    {18, -19, 20},  // Right Chassis Ports (negative port will reverse it!)
 
-    7,      // IMU Port
-    4.125,  // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
-    343);   // Wheel RPM = cartridge * (motor gear / wheel gear)
+    14,      // IMU Port
+    3.25,  // Wheel Diameter (Remember, 4" wheels without screw holes are actually 4.125!)
+    450);   // Wheel RPM = cartridge * (motor gear / wheel gear)
 
 // Uncomment the trackers you're using here!
 // - `8` and `9` are smart ports (making these negative will reverse the sensor)
@@ -21,7 +21,7 @@ ez::Drive chassis(
 // - `2.75` is the wheel diameter
 // - `4.0` is the distance from the center of the wheel to the center of the robot
 // ez::tracking_wheel horiz_tracker(8, 2.75, 4.0);  // This tracking wheel is perpendicular to the drive wheels
-ez::tracking_wheel vert_tracker(9, 2, 0.0);   // This tracking wheel is parallel to the drive wheels
+ez::tracking_wheel vert_tracker(17, 2, 0.0);   // This tracking wheel is parallel to the drive wheels
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -39,10 +39,10 @@ void initialize() {
   // Look at your vertical tracking wheel and decide if it's to the left or right of the center of the robot
   //  - change `left` to `right` if the tracking wheel is to the right of the centerline
   //  - ignore this if you aren't using a vertical tracker
-  chassis.odom_tracker_left_set(&vert_tracker);
+  //chassis.odom_tracker_left_set(&vert_tracker);
 
   // Configure your chassis controls
-  chassis.opcontrol_curve_buttons_toggle(true);   // Enables modifying the controller curve with buttons on the joysticks
+  chassis.opcontrol_curve_buttons_toggle(false);   // Enables modifying the controller curve with buttons on the joysticks
   chassis.opcontrol_drive_activebrake_set(0.0);   // Sets the active brake kP. We recommend ~2.  0 will disable.
   chassis.opcontrol_curve_default_set(0.0, 0.0);  // Defaults for curve. If using tank, only the first parameter is used. (Comment this line out if you have an SD card!)
 
@@ -55,9 +55,9 @@ void initialize() {
 
   // Autonomous Selector using LLEMU
   ez::as::auton_selector.autons_add({
-      {"Drive\n\nDrive forward and come back", drive_example},
-      {"Turn\n\nTurn 3 times.", turn_example},
-      {"Drive and Turn\n\nDrive forward, turn, come back", drive_and_turn},
+      {"Drive\n\nDrive forward and come back", bluered_left},
+      {"Turn\n\nTurn 3 times.", bluered_right},
+      {"Drive and Turn\n\nDrive forward SOLO AWP", drive_and_turn},
       {"Drive and Turn\n\nSlow down during drive", wait_until_change_speed},
       {"Swing Turn\n\nSwing in an 'S' curve", swing_example},
       {"Motion Chaining\n\nDrive forward, turn, and come back, but blend everything together :D", motion_chaining},
@@ -248,38 +248,23 @@ void opcontrol() {
     ez_template_extras();
 
     chassis.opcontrol_tank();  // Tank control
-
-    
-    // Set intake_running to the opposite of itself
-    if (master.get_digital_new_press(DIGITAL_R2)) {
-      intake_running = !intake_running;
-    }
-
-    // Spin the intake if intake_running is true
-    if (intake_running) {
+    if (master.get_digital(DIGITAL_R2)) {
       intake.move(127);
-    }
-    // Stop the intake if intake_running is false 
+    } 
+    else if (master.get_digital(DIGITAL_R1)) {
+      intake.move(-127);
+    } 
     else {
       intake.move(0);
     }
-
-  if (master.get_digital_new_press(DIGITAL_R1)) {
-      intake_running = !intake_running;
-    }
-
-    // Spin the intake if intake_running is true
-  if (intake_running) {
-    intake.move(127);
-    }
-    // Stop the intake if intake_running is false 
-  else {
-    intake.move(0);
-  }
+  if (master.get_digital_new_press(DIGITAL_B)) {
+    hood.set(!hood.get());
+  } 
 
   pros::delay(ez::util::DELAY_TIME);  // This is used for timer calculations!  Keep this ez::util::DELAY_TIME
-  matchloader.set(master.get_digital(DIGITAL_B));
-  hood.set(master.get_digital(DIGITAL_A));
-  gate.set(master.get_digital(DIGITAL_UP));
+
+  
+
+  //gate.set(master.get_digital(DIGITAL_UP));
   }
 }

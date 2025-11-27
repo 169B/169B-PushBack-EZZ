@@ -39,7 +39,7 @@ void default_constants() {
 
   // The amount that turns are prioritized over driving in odom motions
   // - if you have tracking wheels, you can run this higher.  1.0 is the max
-  chassis.odom_turn_bias_set(0.96);
+  chassis.odom_turn_bias_set(0.9);
 
   chassis.odom_look_ahead_set(7_in);           // This is how far ahead in the path the robot looks at
   chassis.odom_boomerang_distance_set(16_in);  // This sets the maximum distance away from target that the carrot point can be
@@ -51,20 +51,26 @@ void default_constants() {
 ///
 // Drive Example
 ///
-void drive_example() {
+void blue/red right() {
   // The first parameter is target inches
   // The second parameter is max speed the robot will drive at
   // The third parameter is a boolean (true or false) for enabling/disabling a slew at the start of drive motions
   // for slew, only enable it when the drive distance is greater than the slew distance + a few inches
 
-  chassis.pid_drive_set(24_in, DRIVE_SPEED, true);
+  chassis.pid_drive_set(5_in, DRIVE_SPEED, true);
   chassis.pid_wait();
 
-  chassis.pid_drive_set(-12_in, DRIVE_SPEED);
+  chassis.pid_turn_set(30_deg, TURN_SPEED);
   chassis.pid_wait();
-
-  chassis.pid_drive_set(-12_in, DRIVE_SPEED);
+  intake.spin(175)
   chassis.pid_wait();
+  chassis.pid_drive_set(26_in, DRIVE_SPEED);
+  chassis.pid_wait();
+  chassis.pid_drive_set(3_in, DRIVE_SPEED);
+  chassis.pid_wait();
+  chassis.pid_turn_set(-55_deg, TURN_SPEED);
+  chassis.pid_wait();
+  
 }
 
 ///
